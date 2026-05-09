@@ -113,7 +113,6 @@ flowchart TB
     BgSpawn --> OriginCtx
     OriginCtx --> AgentCreated
     SkillManage --> UsageSidecar
-    MemoryTool --> UsageSidecar
     UsageSidecar --> UsageCounters
     UsageSidecar --> AgentCreated
 

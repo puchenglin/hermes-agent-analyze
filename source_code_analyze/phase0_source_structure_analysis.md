@@ -2,7 +2,7 @@
 
 ## 1. 分析范围
 
-本文基于仓库 `/Users/chenglin.pu/Project/github/hermes-agent` 的当前源码结构，对 hermes-agent 做第一阶段结构分析。重点不是逐行解释实现，而是先建立可继续深入阅读的地图：
+本文基于仓库 `/hermes-agent` 的当前源码结构，对 hermes-agent 做第一阶段结构分析。重点不是逐行解释实现，而是先建立可继续深入阅读的地图：
 
 - 顶层入口与运行方式
 - 核心 Agent 调用链

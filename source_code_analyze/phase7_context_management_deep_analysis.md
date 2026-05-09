@@ -96,9 +96,10 @@ flowchart TB
     subgraph EphemeralLayer["每轮临时上下文层"]
         PluginHook["pre_llm_call hook"]
         MemoryPrefetch["external memory prefetch"]
-        EphemeralSystem["ephemeral_system_prompt"]
-        Prefill["prefill_messages"]
-        UserInjection["append to user/API messages"]
+        UserInjection["append to current user message<br/>API-call-time copy"]
+        EphemeralSystem["ephemeral_system_prompt<br/>API system augmentation"]
+        Prefill["prefill_messages<br/>insert after system"]
+        ApiCopy["api_messages<br/>per-call copy only"]
     end
 
     subgraph EngineLayer["Context Engine 层"]
@@ -150,8 +151,9 @@ flowchart TB
 
     PluginHook --> UserInjection
     MemoryPrefetch --> UserInjection
-    EphemeralSystem --> UserInjection
-    Prefill --> UserInjection
+    UserInjection --> ApiCopy
+    EphemeralSystem --> ApiCopy
+    Prefill --> ApiCopy
 
     EngineSelect --> EngineABC
     EngineABC --> BuiltinCompressor
@@ -160,7 +162,7 @@ flowchart TB
     BuiltinCompressor --> EngineTools
 
     CachedSystem --> TokenEstimate
-    UserInjection --> TokenEstimate
+    ApiCopy --> TokenEstimate
     EngineTools --> TokenEstimate
     TokenEstimate --> Preflight
     UsageUpdate --> PostTurn
