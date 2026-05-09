@@ -181,6 +181,85 @@ flowchart TB
 
 ---
 
+### 3.2 Nudge 是什么：计数触发的后台自省机制
+
+在 Hermes Agent 里，**Nudge** 不是一个用户直接调用的工具，也不是聊天里的普通提示词，而是一组“计数触发的后台自省机制”。
+
+它解决的问题是：
+
+```text
+一次对话完成后，哪些信息不应该随着上下文结束而丢失？
+
+该记住的事实       -> 写入 Memory
+该复用的流程       -> 创建 Skill
+该修正的经验       -> Patch 既有 Skill
+```
+
+所以 Nudge 更像是 Hermes 自进化闭环里的“后台提醒器”：主 Agent 先正常完成用户任务；任务完成前后，主循环根据计数器判断是否需要 fork 一个后台 review agent；后台 review agent 再审查本轮对话，决定是否调用 memory / skill 工具做沉淀。
+
+源码里主要有两类自进化 Nudge：
+
+| 类型 | 触发计数 | 关注对象 | 结果 |
+| --- | --- | --- | --- |
+| Memory Nudge | 用户 turn 数 | 用户事实、长期偏好、项目状态、稳定约束 | 写入 `USER.md` / `MEMORY.md` |
+| Skill Nudge | tool-calling iteration 数 | 可复用流程、排障步骤、验证方法、已存在 skill 的缺陷 | 创建 skill 或 patch skill |
+
+它们的计数点不同：
+
+```python
+# run_agent.py:11139
+# Track memory nudge trigger (turn-based, checked here).
+# Skill trigger is checked AFTER the agent loop completes, based on
+# how many tool iterations THIS turn used.
+_should_review_memory = False
+if (self._memory_nudge_interval > 0
+        and "memory" in self.valid_tool_names
+        and self._memory_store):
+    self._turns_since_memory += 1
+    if self._turns_since_memory >= self._memory_nudge_interval:
+        _should_review_memory = True
+        self._turns_since_memory = 0
+```
+
+```python
+# run_agent.py:11422
+# Track tool-calling iterations for skill nudge.
+# Counter resets whenever skill_manage is actually used.
+if (self._skill_nudge_interval > 0
+        and "skill_manage" in self.valid_tool_names):
+    self._iters_since_skill += 1
+```
+
+```python
+# run_agent.py:14660
+# Check skill trigger NOW — based on how many tool iterations THIS turn used.
+_should_review_skills = False
+if (self._skill_nudge_interval > 0
+        and self._iters_since_skill >= self._skill_nudge_interval
+        and "skill_manage" in self.valid_tool_names):
+    _should_review_skills = True
+    self._iters_since_skill = 0
+```
+
+这里有一个容易混淆的点：源码里还存在 **post-tool empty response nudge**，它是在工具调用后模型返回空内容时，用一条合成消息“轻推”模型继续回答。这属于主循环错误恢复，不属于本文讨论的 Memory/Skill 自进化 Nudge。
+
+对比一下：
+
+| 名称 | 所在链路 | 目的 | 是否触发后台 review |
+| --- | --- | --- | --- |
+| Memory Nudge | 自进化链路 | 定期审查是否该写入长期记忆 | 是 |
+| Skill Nudge | 自进化链路 | 定期审查是否该创建/修补技能 | 是 |
+| Empty-response Nudge | 主循环恢复链路 | 模型工具调用后空响应时，推动继续输出 | 否 |
+
+一句话总结：
+
+```text
+Nudge = Hermes 在合适的计数点提醒自己：
+这轮经验可能值得沉淀，不要只回答完就忘掉。
+```
+
+---
+
 ## 4. 完整时序图
 
 ```mermaid

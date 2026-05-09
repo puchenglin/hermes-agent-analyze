@@ -61,6 +61,9 @@ Hermes 用稳定 system prompt 承载长期规则；
 | `agent/model_metadata.py` | context length 解析、缓存、token 粗估算 | `1240`、`1445`、`1533` | [model_metadata.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/model_metadata.py) |
 | `plugins/context_engine/__init__.py` | repo-shipped context engine 插件发现与加载 | `1`、`33`、`79`、`100` | [plugins/context_engine/\_\_init\_\_.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/plugins/context_engine/__init__.py) |
 | `agent/prompt_caching.py` | Anthropic prompt cache marker 注入 | `1`、`41` | [prompt_caching.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/prompt_caching.py) |
+| `agent/transports/anthropic.py` | Anthropic cache read/write token 统计抽取 | `150` | [anthropic.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/transports/anthropic.py) |
+| `agent/transports/chat_completions.py` | OpenAI/OpenRouter cache token 统计抽取 | `579` | [chat_completions.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/transports/chat_completions.py) |
+| `agent/transports/codex.py` | Responses API `prompt_cache_key` / cache scope 传递 | `48`、`104`、`124` | [codex.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/transports/codex.py) |
 | `cli.py` | CLI 手动 `/compress` | `7997` | [cli.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/cli.py) |
 | `gateway/run.py` | Gateway 手动 `/compress` | `9960` | [run.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/gateway/run.py) |
 | `hermes_cli/config.py` | context/compression/prompt_caching 默认配置 | `673`、`969` | [config.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/hermes_cli/config.py) |
@@ -626,6 +629,24 @@ for am in api_messages:
 
 ## 13. Prompt Cache：为什么 System Prompt 要稳定
 
+先明确一个概念：**Prefix Cache** 指模型服务商对“请求开头相同部分”的计算缓存。
+
+在多轮 Agent 对话里，请求通常长这样：
+
+```text
+system prompt + tools/schema + history prefix + current turn
+```
+
+如果前面的 `system prompt + tools/schema + history prefix` 在连续请求中保持一致，服务商就可以复用这段前缀的计算结果，只为新增的尾部内容付出主要计算成本。Hermes 自己并不保存模型 KV cache，也不能强制服务商命中缓存；它能做的是把请求组织成“前缀尽量稳定”的形态，并在支持显式缓存标记的 provider 上注入 `cache_control` 或 `prompt_cache_key`。
+
+因此本文里两个词的关系是：
+
+```text
+Prefix Cache：缓存对象，是请求的公共前缀。
+Prompt Cache：服务商提供的能力，用于缓存 prefix 的计算结果。
+Hermes 的实现重点：保持 prefix 稳定，并按 provider 协议打缓存标记。
+```
+
 源码位置：[agent/prompt_caching.py:1](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/prompt_caching.py)
 
 Anthropic prompt caching 的策略是 system + 最近 3 条非 system 消息：
@@ -671,6 +692,382 @@ def apply_anthropic_cache_control(
 system prompt 是 Hermes 内部稳定前缀；
 插件和 recall context 应注入 user message；
 压缩后才允许重建 system prompt。
+```
+
+---
+
+## 13.1 Prefix Cache 实现机制：稳定前缀、缓存标记与命中统计
+
+Hermes 的 Prefix Cache 不是在本地保存模型 KV cache，而是通过请求结构设计去命中模型服务商的 prompt cache：
+
+```text
+稳定 system prompt + 稳定消息前缀 + provider 可识别的 cache marker
+    -> 服务商缓存前缀计算结果
+    -> 后续 turn 复用 cached tokens
+    -> Hermes 从 response usage 中统计 cache read / cache write tokens
+```
+
+它的实现可以拆成六层链路。
+
+### 13.1.1 架构图
+
+```mermaid
+flowchart TB
+    subgraph StablePrefix["稳定前缀构造"]
+        BuildSystem["_build_system_prompt()"]
+        StoredSystem["SessionDB.system_prompt"]
+        CachedSystem["self._cached_system_prompt"]
+        StableHistory["conversation history<br/>deterministic tool ids"]
+    end
+
+    subgraph DynamicContext["动态上下文隔离"]
+        PluginRecall["plugin pre_llm_call context"]
+        MemoryRecall["external memory prefetch"]
+        MCPFacts["MCP / skill reload notice"]
+        UserMessage["append / merge into user message"]
+    end
+
+    subgraph RequestAssembly["API 请求装配"]
+        ApiCopy["api_messages copy"]
+        EffectiveSystem["system message = cached prompt<br/>+ optional ephemeral prompt"]
+        CachePolicy["_anthropic_prompt_cache_policy()"]
+        CacheMarkers["apply_anthropic_cache_control()"]
+        CodexKey["Responses prompt_cache_key=session_id"]
+    end
+
+    subgraph ProviderCache["模型服务商缓存"]
+        Anthropic["Anthropic cache_control"]
+        OpenRouter["OpenRouter / OpenAI cached_tokens"]
+        Codex["OpenAI Responses prompt_cache_key"]
+        Alibaba["Qwen / Alibaba compatible cache_control"]
+    end
+
+    subgraph Observability["统计与观测"]
+        Extract["transport.extract_cache_stats()"]
+        CanonicalUsage["CanonicalUsage"]
+        SessionCounters["session_cache_read_tokens<br/>session_cache_write_tokens"]
+        CLIStats["CLI session stats"]
+    end
+
+    BuildSystem --> CachedSystem
+    StoredSystem --> CachedSystem
+    CachedSystem --> EffectiveSystem
+    StableHistory --> ApiCopy
+    PluginRecall --> UserMessage
+    MemoryRecall --> UserMessage
+    MCPFacts --> UserMessage
+    UserMessage --> ApiCopy
+    EffectiveSystem --> ApiCopy
+    ApiCopy --> CachePolicy
+    CachePolicy --> CacheMarkers
+    ApiCopy --> CodexKey
+    CacheMarkers --> Anthropic
+    CacheMarkers --> OpenRouter
+    CacheMarkers --> Alibaba
+    CodexKey --> Codex
+    Anthropic --> Extract
+    OpenRouter --> Extract
+    Codex --> Extract
+    Alibaba --> Extract
+    Extract --> CanonicalUsage
+    CanonicalUsage --> SessionCounters
+    SessionCounters --> CLIStats
+```
+
+### 13.1.2 完整时序图
+
+```mermaid
+sequenceDiagram
+    participant User as User
+    participant AgentLoop as Agent Loop
+    participant DB as SessionDB
+    participant Builder as System Prompt Builder
+    participant Hook as Plugin Memory Context
+    participant Cache as Prompt Caching
+    participant Transport as Transport Adapter
+    participant LLM as Model Provider
+    participant Meter as Usage Meter
+
+    User->>AgentLoop: user_message
+    alt first turn or no cached prompt
+        AgentLoop->>DB: get_session(session_id)
+        alt stored system_prompt exists
+            DB-->>AgentLoop: exact stored prompt
+            AgentLoop->>AgentLoop: self._cached_system_prompt = stored_prompt
+        else new session
+            AgentLoop->>Builder: _build_system_prompt(system_message)
+            Builder-->>AgentLoop: stable system prompt
+            AgentLoop->>DB: update_system_prompt(session_id, prompt)
+        end
+    else same AIAgent instance
+        AgentLoop->>AgentLoop: reuse self._cached_system_prompt
+    end
+
+    AgentLoop->>Hook: pre_llm_call / memory prefetch
+    Hook-->>AgentLoop: ephemeral context
+    AgentLoop->>AgentLoop: inject dynamic context into user/API messages
+    AgentLoop->>AgentLoop: build api_messages copy
+
+    alt provider supports explicit cache markers
+        AgentLoop->>Cache: apply_anthropic_cache_control(api_messages)
+        Cache-->>AgentLoop: api_messages with cache_control breakpoints
+    else Responses/Codex route
+        AgentLoop->>Transport: build request with prompt_cache_key=session_id
+    end
+
+    AgentLoop->>Transport: create completion/messages/responses request
+    Transport->>LLM: send stable prefix + new turn
+    LLM-->>Transport: response + usage
+    Transport-->>AgentLoop: normalized response
+    AgentLoop->>Meter: canonicalize usage
+    Meter-->>AgentLoop: cache_read_tokens / cache_write_tokens
+    AgentLoop->>AgentLoop: accumulate session cache counters
+```
+
+### 13.1.3 第一层：system prompt 字节级稳定
+
+源码位置：[run_agent.py:5279](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+
+`_build_system_prompt()` 的注释直接说明了设计目标：它只在 session 内构建一次，后续复用，最大化 prefix cache 命中。
+
+```python
+# run_agent.py:5279
+def _build_system_prompt(self, system_message: str = None) -> str:
+    """
+    Assemble the full system prompt from all layers.
+
+    Called once per session (cached on self._cached_system_prompt) and only
+    rebuilt after context compression events. This ensures the system prompt
+    is stable across all turns in a session, maximizing prefix cache hits.
+    """
+```
+
+真正进入 `run_conversation()` 时，Hermes 会优先使用 `self._cached_system_prompt`；如果是 gateway 这种“每条消息新建一个 AIAgent”的场景，则从 SessionDB 取出上轮保存的 system prompt。
+
+源码位置：[run_agent.py:11172](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+
+```python
+# run_agent.py:11172
+if self._cached_system_prompt is None:
+    stored_prompt = None
+    if conversation_history and self._session_db:
+        session_row = self._session_db.get_session(self.session_id)
+        if session_row:
+            stored_prompt = session_row.get("system_prompt") or None
+
+    if stored_prompt:
+        # Continuing session — reuse the exact system prompt from
+        # the previous turn so the Anthropic cache prefix matches.
+        self._cached_system_prompt = stored_prompt
+    else:
+        self._cached_system_prompt = self._build_system_prompt(system_message)
+        self._session_db.update_system_prompt(self.session_id, self._cached_system_prompt)
+```
+
+这里的关键不是“少拼一次字符串”，而是避免 memory、skills、context files、时间戳等组件在继续会话时重新生成出微小差异。哪怕只差一个时间、空格或动态排序，都可能让 provider 认为前缀不同。
+
+### 13.1.4 第二层：动态上下文不改 system prompt
+
+Prefix Cache 最大的敌人是每轮都修改请求前部。Hermes 因此把动态上下文尽量放在 user message 或 API-call-time copy 中：
+
+```text
+稳定长期规则 -> system prompt
+每轮动态召回 -> user message / api_messages 副本
+```
+
+插件 hook 的约束写得很明确。
+
+源码位置：[hermes_cli/plugins.py:1090](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/hermes_cli/plugins.py)
+
+```python
+# hermes_cli/plugins.py:1090
+For ``pre_llm_call``, callbacks may return a dict describing
+context to inject into the current turn's user message::
+
+Context is ALWAYS injected into the user message, never the
+system prompt.  This preserves the prompt cache prefix — the
+system prompt stays identical across turns so cached tokens
+are reused.
+```
+
+MCP reload 和 skill reload 也遵循同一个原则：工具或 skill 变化需要告诉模型，但尽量追加到后部，而不是改 system prompt。
+
+源码位置：[cli.py:8420](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/cli.py)
+
+```python
+# cli.py:8420
+# Inject a message at the END of conversation history so the
+# model knows tools changed.  Appended after all existing
+# messages to preserve prompt-cache for the prefix.
+self.conversation_history.append({
+    "role": "user",
+    "content": "[IMPORTANT: MCP servers have been reloaded. ...]",
+})
+```
+
+### 13.1.5 第三层：Anthropic 风格 cache_control 断点
+
+源码位置：[agent/prompt_caching.py:41](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/prompt_caching.py)
+
+Hermes 对支持 Anthropic-style prompt caching 的 provider 注入 `cache_control`。策略是 `system_and_3`：
+
+```python
+# agent/prompt_caching.py:41
+def apply_anthropic_cache_control(
+    api_messages: List[Dict[str, Any]],
+    cache_ttl: str = "5m",
+    native_anthropic: bool = False,
+) -> List[Dict[str, Any]]:
+    messages = copy.deepcopy(api_messages)
+    marker = {"type": "ephemeral"}
+    if cache_ttl == "1h":
+        marker["ttl"] = "1h"
+
+    breakpoints_used = 0
+
+    if messages[0].get("role") == "system":
+        _apply_cache_marker(messages[0], marker, native_anthropic=native_anthropic)
+        breakpoints_used += 1
+
+    remaining = 4 - breakpoints_used
+    non_sys = [i for i in range(len(messages)) if messages[i].get("role") != "system"]
+    for idx in non_sys[-remaining:]:
+        _apply_cache_marker(messages[idx], marker, native_anthropic=native_anthropic)
+```
+
+也就是：
+
+```text
+cache breakpoint 1: system prompt
+cache breakpoint 2-4: 最近 3 条非 system 消息
+```
+
+`cache_ttl` 来自 `config.yaml` 的 `prompt_caching.cache_ttl`，支持默认 `5m` 和 `1h`。
+
+### 13.1.6 第四层：按 provider/model 自动选择缓存策略
+
+源码位置：[run_agent.py:3103](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+
+Hermes 不是无脑给所有请求加 marker，而是由 `_anthropic_prompt_cache_policy()` 判断：
+
+```python
+# run_agent.py:3103
+def _anthropic_prompt_cache_policy(...) -> tuple[bool, bool]:
+    """Decide whether to apply Anthropic prompt caching and which layout to use.
+
+    Returns ``(should_cache, use_native_layout)``:
+      * ``should_cache`` — inject ``cache_control`` breakpoints for this
+        request
+      * ``use_native_layout`` — place markers on the *inner* content
+        blocks; when False markers go on the message envelope
+    """
+```
+
+主要分支：
+
+| 场景 | 是否启用 | marker layout |
+| --- | --- | --- |
+| Native Anthropic Messages API | 启用 | native layout |
+| OpenRouter + Claude | 启用 | OpenAI-wire / envelope layout |
+| Anthropic-compatible gateway + Claude | 启用 | native layout |
+| MiniMax Anthropic-compatible endpoint | 启用 | native layout |
+| Qwen / Alibaba family | 启用 | envelope layout |
+| 普通 OpenAI Chat Completions | 不注入 Anthropic marker | 依赖 provider 自身缓存 |
+
+### 13.1.7 第五层：Responses API 的 `prompt_cache_key`
+
+源码位置：[agent/transports/codex.py:104](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/transports/codex.py)
+
+在 Responses/Codex 路径下，Hermes 会用 `session_id` 作为 `prompt_cache_key`，给 provider 一个明确的缓存作用域：
+
+```python
+# agent/transports/codex.py:104
+session_id = params.get("session_id")
+if not is_github_responses and session_id:
+    kwargs["prompt_cache_key"] = session_id
+```
+
+Codex backend 还会把同一个 scope 写到 headers：
+
+```python
+# agent/transports/codex.py:124
+prompt_cache_key = kwargs.get("prompt_cache_key")
+cache_scope_id = str(prompt_cache_key or session_id or "").strip()
+if cache_scope_id:
+    merged_extra_headers["session_id"] = cache_scope_id
+    merged_extra_headers["x-client-request-id"] = cache_scope_id
+    kwargs["extra_headers"] = merged_extra_headers
+```
+
+这条链路和 Anthropic `cache_control` 不同：它不是在消息块上打断点，而是告诉 Responses API “这组请求属于同一个 cache scope”。
+
+### 13.1.8 第六层：命中统计与可观测性
+
+源码位置：[agent/transports/anthropic.py:150](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/transports/anthropic.py)
+
+Anthropic transport 从 usage 中抽取：
+
+```python
+# agent/transports/anthropic.py:150
+def extract_cache_stats(self, response: Any) -> Optional[Dict[str, int]]:
+    usage = getattr(response, "usage", None)
+    cached = getattr(usage, "cache_read_input_tokens", 0) or 0
+    written = getattr(usage, "cache_creation_input_tokens", 0) or 0
+    if cached or written:
+        return {"cached_tokens": cached, "creation_tokens": written}
+```
+
+OpenAI/OpenRouter 风格的 transport 从 `prompt_tokens_details` 中抽取：
+
+源码位置：[agent/transports/chat_completions.py:579](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/transports/chat_completions.py)
+
+```python
+# agent/transports/chat_completions.py:579
+def extract_cache_stats(self, response: Any) -> dict[str, int] | None:
+    usage = getattr(response, "usage", None)
+    details = getattr(usage, "prompt_tokens_details", None)
+    cached = getattr(details, "cached_tokens", 0) or 0
+    written = getattr(details, "cache_write_tokens", 0) or 0
+    if cached or written:
+        return {"cached_tokens": cached, "creation_tokens": written}
+```
+
+最后，主循环把标准化后的 usage 累加到 session 级计数器：
+
+源码位置：[run_agent.py:12313](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+
+```python
+# run_agent.py:12313
+self.session_input_tokens += canonical_usage.input_tokens
+self.session_output_tokens += canonical_usage.output_tokens
+self.session_cache_read_tokens += canonical_usage.cache_read_tokens
+self.session_cache_write_tokens += canonical_usage.cache_write_tokens
+```
+
+CLI 的 session stats 会展示这两个指标：
+
+```text
+Cache read tokens
+Cache write tokens
+```
+
+### 13.1.9 关键不变量
+
+Prefix Cache 在 Hermes 里依赖以下不变量：
+
+1. `self._cached_system_prompt` 在同一 session 内必须稳定。
+2. 继续会话时优先复用 SessionDB 里的 exact system prompt。
+3. 动态 recall context 不进入 system prompt。
+4. MCP / skill / plugin 变化尽量追加到后部 user message。
+5. tool call id 在缺失时用 deterministic id，避免随机 UUID 污染前缀。
+6. 只有压缩、模型切换、reset 等明确事件才允许重建 system prompt。
+7. provider 支持显式 cache marker 时才注入 `cache_control`；不支持时依赖 provider 自身的自动 prefix cache 或 `prompt_cache_key`。
+
+因此，Hermes 的 Prefix Cache 可以总结为：
+
+```text
+不是“缓存某个 prompt 字符串”；
+而是通过稳定上下文拓扑，让服务商能持续识别同一个 prefix。
 ```
 
 ---
