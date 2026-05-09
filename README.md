@@ -12,6 +12,15 @@
   <a href="README.zh-CN.md"><img src="https://img.shields.io/badge/Lang-中文-red?style=for-the-badge" alt="中文"></a>
 </p>
 
+> [!IMPORTANT]
+> **Fork 说明：源码分析仓库**
+>
+> 本仓库 fork 自 Hermes Agent 官方仓库 [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)，不是官方发布仓库。
+>
+> 本仓库主要用于深入分析 Hermes Agent 源码，分阶段分析文档放在 [`source_code_analyze/`](source_code_analyze/) 目录下。
+>
+> 对应源码版本：`hermes-agent 0.13.0`；源码分析基线提交为 `78b0008f4`（`2026-05-08`，`fix(gateway): also catch restart TimeoutExpired; friendly message`）。本 fork 在该源码基线之上增加源码分析文档和说明。
+
 **The self-improving AI agent built by [Nous Research](https://nousresearch.com).** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions. Run it on a $5 VPS, a GPU cluster, or serverless infrastructure that costs nearly nothing when idle. It's not tied to your laptop — talk to it from Telegram while it works on a cloud VM.
 
 Use any model you want — [Nous Portal](https://portal.nousresearch.com), [OpenRouter](https://openrouter.ai) (200+ models), [NVIDIA NIM](https://build.nvidia.com) (Nemotron), [Xiaomi MiMo](https://platform.xiaomimimo.com), [z.ai/GLM](https://z.ai), [Kimi/Moonshot](https://platform.moonshot.ai), [MiniMax](https://www.minimax.io), [Hugging Face](https://huggingface.co), OpenAI, or your own endpoint. Switch with `hermes model` — no code changes, no lock-in.
