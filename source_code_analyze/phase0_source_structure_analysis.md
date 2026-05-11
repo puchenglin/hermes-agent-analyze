@@ -286,7 +286,7 @@ agent/
 ├── context_compressor.py    # 上下文压缩
 ├── context_engine.py        # context engine 抽象
 ├── memory_manager.py        # memory provider 协调
-├── memory_provider.py       # memory provider ABC
+├── memory_provider.py       # memory provider ABC(抽象基类Abstract Base Class)
 ├── prompt_builder.py        # prompt 构建
 ├── skill_commands.py        # skill slash command 加载
 ├── skill_preprocessing.py   # skill 预处理
@@ -301,7 +301,7 @@ agent/
 
 `agent/transports/` 是模型 API 层抽象，包含 chat completions、anthropic、bedrock、codex 等 transport。provider 插件注册的是 provider profile，实际请求路径会结合这些 transport 和 adapter。
 
-`agent/curator.py` 是自进化链路里的后台技能库维护器。它只治理 agent 自主创建并带有 provenance 标记的 skills，根据使用情况做 `stale`、`archive`、`reactivate`，也可以 fork 后台 review agent 合并过窄或重复的 skills。它不属于主对话循环的实时任务处理路径，详细分析见 [[phase6_self_evolution_mechanism_analysis]]。
+`agent/curator.py` 是自进化链路里的后台技能库维护器。它只治理 agent 自主创建并带有 provenance 标记的 skills，根据使用情况做 `stale（过期）`、`archive（存档）`、`reactivate（重新激活）`，也可以 fork 后台 review agent 合并过窄或重复的 skills。它不属于主对话循环的实时任务处理路径，详细分析见 [[phase6_self_evolution_mechanism_analysis]]。
 
 ## 8. CLI、TUI 与 Dashboard
 

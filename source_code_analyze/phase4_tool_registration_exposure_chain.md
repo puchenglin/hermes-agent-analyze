@@ -32,32 +32,32 @@ run_agent.py::_build_api_kwargs() 才把 schema 放进模型请求。
 
 ## 2. 源码跳转索引
 
-以下链接使用 Obsidian URI，可在 Obsidian 中直接跳到源码文件。若 Obsidian 没有把仓库作为 vault 打开，也可以复制路径到编辑器。
+以下链接使用普通 Markdown 相对链接，可在 GitHub、Markdown 预览或支持源码跳转的编辑器中直接打开。带行号的位置使用 `#L行号` 锚点。
 
-| 模块                    | 作用                               | Obsidian 链接                                                                                           |
+| 模块                    | 作用                               | Markdown 链接                                                                                           |
 | ----------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `tools/registry.py`     | 全局工具注册中心                   | [registry.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/registry.py)    |
-| `toolsets.py`           | 工具集合定义与解析                 | [toolsets.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/toolsets.py)          |
-| `model_tools.py`        | schema 暴露入口与工具调度 API      | [model_tools.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/model_tools.py)    |
-| `run_agent.py`          | Agent 初始化、模型请求、工具名校验 | [run_agent.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)        |
-| `hermes_cli/plugins.py` | 插件工具注册入口                   | [plugins.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/hermes_cli/plugins.py) |
+| `tools/registry.py`     | 全局工具注册中心                   | [registry.py](../tools/registry.py)    |
+| `toolsets.py`           | 工具集合定义与解析                 | [toolsets.py](../toolsets.py)          |
+| `model_tools.py`        | schema 暴露入口与工具调度 API      | [model_tools.py](../model_tools.py)    |
+| `run_agent.py`          | Agent 初始化、模型请求、工具名校验 | [run_agent.py](../run_agent.py)        |
+| `hermes_cli/plugins.py` | 插件工具注册入口                   | [plugins.py](../hermes_cli/plugins.py) |
 
 关键函数：
 
 | 函数 / 数据结构                  | 文件位置                                                                                                               | 职责                                      |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `discover_builtin_tools()`       | [tools/registry.py:57](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/registry.py)          | 扫描并导入内置工具模块                    |
-| `ToolRegistry.register()`        | [tools/registry.py:226](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/registry.py)         | 写入全局 registry                         |
-| `ToolRegistry.get_definitions()` | [tools/registry.py:310](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/registry.py)         | 根据工具名集合返回 OpenAI tool schema     |
-| `_HERMES_CORE_TOOLS`             | [toolsets.py:31](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/toolsets.py)                      | CLI / gateway 默认核心工具清单            |
-| `get_toolset()`                  | [toolsets.py:524](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/toolsets.py)                     | 静态 toolset 与动态 registry toolset 合并 |
-| `resolve_toolset()`              | [toolsets.py:575](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/toolsets.py)                     | 递归展开 toolset                          |
-| `get_tool_definitions()`         | [model_tools.py:271](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/model_tools.py)               | Agent 获取 tool schema 的主入口           |
-| `_compute_tool_definitions()`    | [model_tools.py:335](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/model_tools.py)               | toolset 过滤、schema 动态修正             |
-| `PluginContext.register_tool()`  | [hermes_cli/plugins.py:246](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/hermes_cli/plugins.py) | 插件注册工具的 facade                     |
-| `AIAgent.__init__` 工具加载      | [run_agent.py:1759](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)                  | 把 schema 存入 `self.tools`               |
-| `_build_api_kwargs()`            | [run_agent.py:8800](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)                  | 把 `self.tools` 交给 provider transport   |
-| 工具名校验                       | [run_agent.py:13788](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)                 | 防止模型调用未暴露工具                    |
+| `discover_builtin_tools()`       | [tools/registry.py:57](../tools/registry.py#L57)          | 扫描并导入内置工具模块                    |
+| `ToolRegistry.register()`        | [tools/registry.py:226](../tools/registry.py#L226)         | 写入全局 registry                         |
+| `ToolRegistry.get_definitions()` | [tools/registry.py:310](../tools/registry.py#L310)         | 根据工具名集合返回 OpenAI tool schema     |
+| `_HERMES_CORE_TOOLS`             | [toolsets.py:31](../toolsets.py#L31)                      | CLI / gateway 默认核心工具清单            |
+| `get_toolset()`                  | [toolsets.py:524](../toolsets.py#L524)                     | 静态 toolset 与动态 registry toolset 合并 |
+| `resolve_toolset()`              | [toolsets.py:575](../toolsets.py#L575)                     | 递归展开 toolset                          |
+| `get_tool_definitions()`         | [model_tools.py:271](../model_tools.py#L271)               | Agent 获取 tool schema 的主入口           |
+| `_compute_tool_definitions()`    | [model_tools.py:335](../model_tools.py#L335)               | toolset 过滤、schema 动态修正             |
+| `PluginContext.register_tool()`  | [hermes_cli/plugins.py:246](../hermes_cli/plugins.py#L246) | 插件注册工具的 facade                     |
+| `AIAgent.__init__` 工具加载      | [run_agent.py:1759](../run_agent.py#L1759)                  | 把 schema 存入 `self.tools`               |
+| `_build_api_kwargs()`            | [run_agent.py:8800](../run_agent.py#L8800)                  | 把 `self.tools` 交给 provider transport   |
+| 工具名校验                       | [run_agent.py:13788](../run_agent.py#L13788)                 | 防止模型调用未暴露工具                    |
 
 ---
 
@@ -142,7 +142,7 @@ Import chain (circular-import safe):
 """
 ```
 
-源码位置：[tools/registry.py:1](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/registry.py)
+源码位置：[tools/registry.py:1](../tools/registry.py#L1)
 
 这个设计的关键点：
 
@@ -181,7 +181,7 @@ def _module_registers_tools(module_path: Path) -> bool:
     return any(_is_registry_register_call(stmt) for stmt in tree.body)
 ```
 
-源码位置：[tools/registry.py:29](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/registry.py)
+源码位置：[tools/registry.py:29](../tools/registry.py#L29)
 
 这段逻辑非常重要：Hermes 不是扫描 `tools/*.py` 后全部导入，而是先做 AST 判断：
 
@@ -212,7 +212,7 @@ def discover_builtin_tools(tools_dir: Optional[Path] = None) -> List[str]:
     return imported
 ```
 
-源码位置：[tools/registry.py:57](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/registry.py)
+源码位置：[tools/registry.py:57](../tools/registry.py#L57)
 
 导入工具模块的副作用就是执行模块顶层的 `registry.register(...)`。
 
@@ -246,7 +246,7 @@ except Exception as e:
     logger.debug("Plugin discovery failed: %s", e)
 ```
 
-源码位置：[model_tools.py:176](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/model_tools.py)
+源码位置：[model_tools.py:176](../model_tools.py#L176)
 
 这里有一个工程上的边界：
 
@@ -312,7 +312,7 @@ def register(
         self._generation += 1
 ```
 
-源码位置：[tools/registry.py:226](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/registry.py)
+源码位置：[tools/registry.py:226](../tools/registry.py#L226)
 
 这个方法体现了几个约束：
 
@@ -373,7 +373,7 @@ _HERMES_CORE_TOOLS = [
 ]
 ```
 
-源码位置：[toolsets.py:31](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/toolsets.py)
+源码位置：[toolsets.py:31](../toolsets.py#L31)
 
 这份清单是默认工具面的基线。一个内置工具即便已经 `registry.register()`，如果没有被任何可解析的 toolset 纳入，通常不会暴露给模型。
 
@@ -395,7 +395,7 @@ TOOLSETS = {
     },
 ```
 
-源码位置：[toolsets.py:75](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/toolsets.py)
+源码位置：[toolsets.py:75](../toolsets.py#L75)
 
 `TOOLSETS` 只说明“哪些工具名属于哪个集合”。它不保存 handler，不保存 schema，也不执行工具。
 
@@ -448,7 +448,7 @@ def get_toolset(name: str) -> Optional[Dict[str, Any]]:
     }
 ```
 
-源码位置：[toolsets.py:524](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/toolsets.py)
+源码位置：[toolsets.py:524](../toolsets.py#L524)
 
 这里是工具暴露链路中最容易被忽略的动态部分：
 
@@ -520,7 +520,7 @@ def resolve_toolset(name: str, visited: Set[str] = None) -> List[str]:
     return sorted(tools)
 ```
 
-源码位置：[toolsets.py:575](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/toolsets.py)
+源码位置：[toolsets.py:575](../toolsets.py#L575)
 
 `resolve_toolset()` 输出的不是 schema，而是工具名列表。后续还必须经过 registry 的 schema 查询与 `check_fn` 过滤。
 
@@ -561,7 +561,7 @@ def register_tool(
     logger.debug("Plugin %s registered tool: %s", self.manifest.name, name)
 ```
 
-源码位置：[hermes_cli/plugins.py:246](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/hermes_cli/plugins.py)
+源码位置：[hermes_cli/plugins.py:246](../hermes_cli/plugins.py#L246)
 
 这说明插件工具和内置工具共享：
 
@@ -603,7 +603,7 @@ def get_tool_definitions(
     """
 ```
 
-源码位置：[model_tools.py:271](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/model_tools.py)
+源码位置：[model_tools.py:271](../model_tools.py#L271)
 
 这个函数是 Agent 初始化工具面的主入口。它的输入是 toolset，不是工具名。
 
@@ -635,7 +635,7 @@ if quiet_mode:
         return list(cached)
 ```
 
-源码位置：[model_tools.py:297](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/model_tools.py)
+源码位置：[model_tools.py:297](../model_tools.py#L297)
 
 缓存 key 包含：
 
@@ -687,7 +687,7 @@ if disabled_toolsets:
                 print(f"🚫 Disabled toolset '{toolset_name}': {', '.join(resolved) if resolved else 'no tools'}")
 ```
 
-源码位置：[model_tools.py:344](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/model_tools.py)
+源码位置：[model_tools.py:344](../model_tools.py#L344)
 
 这里的规则：
 
@@ -709,7 +709,7 @@ if disabled_toolsets:
 filtered_tools = registry.get_definitions(tools_to_include, quiet=quiet_mode)
 ```
 
-源码位置：[model_tools.py:385](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/model_tools.py)
+源码位置：[model_tools.py:385](../model_tools.py#L385)
 
 这一点很关键：插件不是“注册了就必然暴露”。插件工具仍然必须通过 toolset 解析和 disabled subtraction。
 
@@ -747,7 +747,7 @@ def get_definitions(self, tool_names: Set[str], quiet: bool = False) -> List[dic
     return result
 ```
 
-源码位置：[tools/registry.py:310](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/registry.py)
+源码位置：[tools/registry.py:310](../tools/registry.py#L310)
 
 这是真正的“最后可见性过滤”：
 
@@ -774,7 +774,7 @@ if "execute_code" in available_tool_names:
             break
 ```
 
-源码位置：[model_tools.py:394](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/model_tools.py)
+源码位置：[model_tools.py:394](../model_tools.py#L394)
 
 这里体现了一个设计原则：schema 文案也必须和当前实际可用工具一致。
 
@@ -815,7 +815,7 @@ elif not self.quiet_mode:
     print("🛠️  No tools loaded (all tools filtered out or unavailable)")
 ```
 
-源码位置：[run_agent.py:1758](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:1758](../run_agent.py#L1758)
 
 此处完成两个动作：
 
@@ -850,7 +850,7 @@ if self._memory_manager and self.tools is not None:
             _existing_tool_names.add(_tname)
 ```
 
-源码位置：[run_agent.py:1963](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:1963](../run_agent.py#L1963)
 
 这是特殊路径：memory provider 插件不一定通过 `ctx.register_tool()` 进入 registry，也可以在 Agent 初始化后直接注入 `self.tools`。
 
@@ -890,7 +890,7 @@ if hasattr(self, "context_compressor") and self.context_compressor and self.tool
             _existing_tool_names.add(_tname)
 ```
 
-源码位置：[run_agent.py:2254](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:2254](../run_agent.py#L2254)
 
 这说明 Hermes 工具暴露面有两类来源：
 
@@ -922,7 +922,7 @@ def _build_api_kwargs(self, api_messages: list) -> dict:
             reasoning_config=self.reasoning_config,
 ```
 
-源码位置：[run_agent.py:8800](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:8800](../run_agent.py#L8800)
 
 `self.tools` 也会传给 Bedrock、Codex Responses、Chat Completions provider profile、legacy path：
 
@@ -942,7 +942,7 @@ return _ct.build_kwargs(
 )
 ```
 
-源码位置：[run_agent.py:8854](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:8854](../run_agent.py#L8854)
 
 最终 provider adapter 再负责把 OpenAI-format schema 转成目标 API 需要的格式。
 
@@ -973,7 +973,7 @@ if invalid_tool_calls:
     available = ", ".join(sorted(self.valid_tool_names))
 ```
 
-源码位置：[run_agent.py:13788](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:13788](../run_agent.py#L13788)
 
 所以“工具暴露链路”的终点不是 `self.tools`，而是：
 

@@ -50,23 +50,23 @@ Hermes 用稳定 system prompt 承载长期规则；
 
 ## 2. 源码跳转索引
 
-以下链接使用 Obsidian URI，可在 Obsidian 中直接打开源码文件。行号写在“关键位置”列中，便于配合编辑器跳转。
+以下链接使用普通 Markdown 相对链接，可在 GitHub、Markdown 预览或支持源码跳转的编辑器中直接打开。行号写在“关键位置”列中，便于配合编辑器跳转。
 
-| 模块 | 作用 | 关键位置 | Obsidian 链接 |
+| 模块 | 作用 | 关键位置 | Markdown 链接 |
 | --- | --- | --- | --- |
-| `run_agent.py` | Context 管理主入口：系统 prompt、preflight、压缩、工具路由、prompt cache | `2011`、`5275`、`9589`、`11213`、`11556`、`14074` | [run_agent.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py) |
-| `agent/prompt_builder.py` | 系统 prompt 片段构建、上下文文件发现与注入防护 | `1`、`55`、`1269`、`1394` | [prompt_builder.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/prompt_builder.py) |
-| `agent/context_engine.py` | 可插拔 Context Engine 抽象接口 | `1`、`65`、`100`、`151` | [context_engine.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/context_engine.py) |
-| `agent/context_compressor.py` | 默认上下文压缩器：剪裁、摘要、head/tail 保护、反抖动 | `1`、`404`、`493`、`519`、`766`、`1317` | [context_compressor.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/context_compressor.py) |
-| `agent/model_metadata.py` | context length 解析、缓存、token 粗估算 | `1240`、`1445`、`1533` | [model_metadata.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/model_metadata.py) |
-| `plugins/context_engine/__init__.py` | repo-shipped context engine 插件发现与加载 | `1`、`33`、`79`、`100` | [plugins/context_engine/\_\_init\_\_.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/plugins/context_engine/__init__.py) |
-| `agent/prompt_caching.py` | Anthropic prompt cache marker 注入 | `1`、`41` | [prompt_caching.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/prompt_caching.py) |
-| `agent/transports/anthropic.py` | Anthropic cache read/write token 统计抽取 | `150` | [anthropic.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/transports/anthropic.py) |
-| `agent/transports/chat_completions.py` | OpenAI/OpenRouter cache token 统计抽取 | `579` | [chat_completions.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/transports/chat_completions.py) |
-| `agent/transports/codex.py` | Responses API `prompt_cache_key` / cache scope 传递 | `48`、`104`、`124` | [codex.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/transports/codex.py) |
-| `cli.py` | CLI 手动 `/compress` | `7997` | [cli.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/cli.py) |
-| `gateway/run.py` | Gateway 手动 `/compress` | `9960` | [run.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/gateway/run.py) |
-| `hermes_cli/config.py` | context/compression/prompt_caching 默认配置 | `673`、`969` | [config.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/hermes_cli/config.py) |
+| `run_agent.py` | Context 管理主入口：系统 prompt、preflight、压缩、工具路由、prompt cache | `2011`、`5275`、`9589`、`11213`、`11556`、`14074` | [run_agent.py](../run_agent.py) |
+| `agent/prompt_builder.py` | 系统 prompt 片段构建、上下文文件发现与注入防护 | `1`、`55`、`1269`、`1394` | [prompt_builder.py](../agent/prompt_builder.py) |
+| `agent/context_engine.py` | 可插拔 Context Engine 抽象接口 | `1`、`65`、`100`、`151` | [context_engine.py](../agent/context_engine.py) |
+| `agent/context_compressor.py` | 默认上下文压缩器：剪裁、摘要、head/tail 保护、反抖动 | `1`、`404`、`493`、`519`、`766`、`1317` | [context_compressor.py](../agent/context_compressor.py) |
+| `agent/model_metadata.py` | context length 解析、缓存、token 粗估算 | `1240`、`1445`、`1533` | [model_metadata.py](../agent/model_metadata.py) |
+| `plugins/context_engine/__init__.py` | repo-shipped context engine 插件发现与加载 | `1`、`33`、`79`、`100` | [plugins/context_engine/\_\_init\_\_.py](../plugins/context_engine/__init__.py) |
+| `agent/prompt_caching.py` | Anthropic prompt cache marker 注入 | `1`、`41` | [prompt_caching.py](../agent/prompt_caching.py) |
+| `agent/transports/anthropic.py` | Anthropic cache read/write token 统计抽取 | `150` | [anthropic.py](../agent/transports/anthropic.py) |
+| `agent/transports/chat_completions.py` | OpenAI/OpenRouter cache token 统计抽取 | `579` | [chat_completions.py](../agent/transports/chat_completions.py) |
+| `agent/transports/codex.py` | Responses API `prompt_cache_key` / cache scope 传递 | `48`、`104`、`124` | [codex.py](../agent/transports/codex.py) |
+| `cli.py` | CLI 手动 `/compress` | `7997` | [cli.py](../cli.py) |
+| `gateway/run.py` | Gateway 手动 `/compress` | `9960` | [run.py](../gateway/run.py) |
+| `hermes_cli/config.py` | context/compression/prompt_caching 默认配置 | `673`、`969` | [config.py](../hermes_cli/config.py) |
 
 ---
 
@@ -275,7 +275,7 @@ Hermes 的 Context 可以按“稳定性”拆成四层：
 
 ## 6. 系统 Prompt 构建：一次构建，多轮复用
 
-源码位置：[run_agent.py:5275](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:5275](../run_agent.py#L5275)
 
 `_build_system_prompt()` 是稳定系统上下文的总装入口：
 
@@ -312,7 +312,7 @@ system prompt 每个 session 只构建一次；
 
 ## 7. 系统 Prompt 的组成顺序
 
-源码位置：[run_agent.py:5292](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:5292](../run_agent.py#L5292)
 
 身份层优先使用 `SOUL.md`：
 
@@ -411,7 +411,7 @@ if _env_hints:
 
 ## 8. Project Context Files 加载策略
 
-源码位置：[agent/prompt_builder.py:1394](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/prompt_builder.py)
+源码位置：[agent/prompt_builder.py:1394](../agent/prompt_builder.py#L1394)
 
 项目上下文文件不是全部递归加载，而是“优先级 first found wins”：
 
@@ -458,7 +458,7 @@ def build_context_files_prompt(cwd: Optional[str] = None, skip_soul: bool = Fals
 
 ## 9. Context File 安全扫描与截断
 
-源码位置：[agent/prompt_builder.py:55](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/prompt_builder.py)
+源码位置：[agent/prompt_builder.py:55](../agent/prompt_builder.py#L55)
 
 Context 文件进入 system prompt 前会做 prompt injection 风险扫描：
 
@@ -510,7 +510,7 @@ def _truncate_content(content: str, filename: str, max_chars: int = CONTEXT_FILE
 
 ## 10. 临时上下文：插件 Hook 只能注入 User Message
 
-源码位置：[run_agent.py:11281](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:11281](../run_agent.py#L11281)
 
 每轮进入 tool-calling loop 前，Hermes 会调用 `pre_llm_call` hooks：
 
@@ -543,7 +543,7 @@ _plugin_user_context = ""
 
 ## 11. 临时上下文：External Memory Prefetch
 
-源码位置：[run_agent.py:11354](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:11354](../run_agent.py#L11354)
 
 外部 memory provider 的 recall context 也是每轮预取一次，缓存给整个 tool loop 使用：
 
@@ -573,7 +573,7 @@ if self._memory_manager:
 
 ## 12. API Call 时的 Context 装配
 
-源码位置：[run_agent.py:11556](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:11556](../run_agent.py#L11556)
 
 模型请求前，Hermes 会在 API message copy 上装配稳定 system 与临时内容：
 
@@ -649,7 +649,7 @@ Prompt Cache：服务商提供的能力，用于缓存 prefix 的计算结果。
 Hermes 的实现重点：保持 prefix 稳定，并按 provider 协议打缓存标记。
 ```
 
-源码位置：[agent/prompt_caching.py:1](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/prompt_caching.py)
+源码位置：[agent/prompt_caching.py:1](../agent/prompt_caching.py#L1)
 
 Anthropic prompt caching 的策略是 system + 最近 3 条非 system 消息：
 
@@ -828,7 +828,7 @@ sequenceDiagram
 
 ### 13.1.3 第一层：system prompt 字节级稳定
 
-源码位置：[run_agent.py:5279](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:5279](../run_agent.py#L5279)
 
 `_build_system_prompt()` 的注释直接说明了设计目标：它只在 session 内构建一次，后续复用，最大化 prefix cache 命中。
 
@@ -846,7 +846,7 @@ def _build_system_prompt(self, system_message: str = None) -> str:
 
 真正进入 `run_conversation()` 时，Hermes 会优先使用 `self._cached_system_prompt`；如果是 gateway 这种“每条消息新建一个 AIAgent”的场景，则从 SessionDB 取出上轮保存的 system prompt。
 
-源码位置：[run_agent.py:11172](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:11172](../run_agent.py#L11172)
 
 ```python
 # run_agent.py:11172
@@ -879,7 +879,7 @@ Prefix Cache 最大的敌人是每轮都修改请求前部。Hermes 因此把动
 
 插件 hook 的约束写得很明确。
 
-源码位置：[hermes_cli/plugins.py:1090](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/hermes_cli/plugins.py)
+源码位置：[hermes_cli/plugins.py:1090](../hermes_cli/plugins.py#L1090)
 
 ```python
 # hermes_cli/plugins.py:1090
@@ -894,7 +894,7 @@ are reused.
 
 MCP reload 和 skill reload 也遵循同一个原则：工具或 skill 变化需要告诉模型，但尽量追加到后部，而不是改 system prompt。
 
-源码位置：[cli.py:8420](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/cli.py)
+源码位置：[cli.py:8420](../cli.py#L8420)
 
 ```python
 # cli.py:8420
@@ -909,7 +909,7 @@ self.conversation_history.append({
 
 ### 13.1.5 第三层：Anthropic 风格 cache_control 断点
 
-源码位置：[agent/prompt_caching.py:41](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/prompt_caching.py)
+源码位置：[agent/prompt_caching.py:41](../agent/prompt_caching.py#L41)
 
 Hermes 对支持 Anthropic-style prompt caching 的 provider 注入 `cache_control`。策略是 `system_and_3`：
 
@@ -948,7 +948,7 @@ cache breakpoint 2-4: 最近 3 条非 system 消息
 
 ### 13.1.6 第四层：按 provider/model 自动选择缓存策略
 
-源码位置：[run_agent.py:3103](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:3103](../run_agent.py#L3103)
 
 Hermes 不是无脑给所有请求加 marker，而是由 `_anthropic_prompt_cache_policy()` 判断：
 
@@ -978,7 +978,7 @@ def _anthropic_prompt_cache_policy(...) -> tuple[bool, bool]:
 
 ### 13.1.7 第五层：Responses API 的 `prompt_cache_key`
 
-源码位置：[agent/transports/codex.py:104](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/transports/codex.py)
+源码位置：[agent/transports/codex.py:104](../agent/transports/codex.py#L104)
 
 在 Responses/Codex 路径下，Hermes 会用 `session_id` 作为 `prompt_cache_key`，给 provider 一个明确的缓存作用域：
 
@@ -1005,7 +1005,7 @@ if cache_scope_id:
 
 ### 13.1.8 第六层：命中统计与可观测性
 
-源码位置：[agent/transports/anthropic.py:150](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/transports/anthropic.py)
+源码位置：[agent/transports/anthropic.py:150](../agent/transports/anthropic.py#L150)
 
 Anthropic transport 从 usage 中抽取：
 
@@ -1021,7 +1021,7 @@ def extract_cache_stats(self, response: Any) -> Optional[Dict[str, int]]:
 
 OpenAI/OpenRouter 风格的 transport 从 `prompt_tokens_details` 中抽取：
 
-源码位置：[agent/transports/chat_completions.py:579](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/transports/chat_completions.py)
+源码位置：[agent/transports/chat_completions.py:579](../agent/transports/chat_completions.py#L579)
 
 ```python
 # agent/transports/chat_completions.py:579
@@ -1036,7 +1036,7 @@ def extract_cache_stats(self, response: Any) -> dict[str, int] | None:
 
 最后，主循环把标准化后的 usage 累加到 session 级计数器：
 
-源码位置：[run_agent.py:12313](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:12313](../run_agent.py#L12313)
 
 ```python
 # run_agent.py:12313
@@ -1076,7 +1076,7 @@ Prefix Cache 在 Hermes 里依赖以下不变量：
 
 ## 14. Context Engine 抽象
 
-源码位置：[agent/context_engine.py:1](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/context_engine.py)
+源码位置：[agent/context_engine.py:1](../agent/context_engine.py#L1)
 
 `ContextEngine` 是上下文窗口管理的插件抽象：
 
@@ -1148,7 +1148,7 @@ def handle_tool_call(self, name: str, args: Dict[str, Any], **kwargs) -> str:
 
 ## 15. Context Engine 选择与工具暴露
 
-源码位置：[run_agent.py:2165](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:2165](../run_agent.py#L2165)
 
 Agent 初始化时按配置选择 engine：
 
@@ -1232,7 +1232,7 @@ elif self._context_engine_tool_names and function_name in self._context_engine_t
 
 ## 16. Context Engine 插件发现
 
-源码位置：[plugins/context_engine/\_\_init\_\_.py:1](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/plugins/context_engine/__init__.py)
+源码位置：[plugins/context_engine/\_\_init\_\_.py:1](../plugins/context_engine/__init__.py#L1)
 
 repo-shipped context engine 是独立发现系统：
 
@@ -1284,7 +1284,7 @@ class _EngineCollector:
 
 ## 17. Context Length 解析
 
-源码位置：[agent/model_metadata.py:1240](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/model_metadata.py)
+源码位置：[agent/model_metadata.py:1240](../agent/model_metadata.py#L1240)
 
 Context 管理的第一步是知道模型窗口有多大：
 
@@ -1346,7 +1346,7 @@ if _ctx and _ctx < MINIMUM_CONTEXT_LENGTH:
 
 ## 18. Token 粗估算：为什么要把 Tools 也算进去
 
-源码位置：[agent/model_metadata.py:1445](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/model_metadata.py)
+源码位置：[agent/model_metadata.py:1445](../agent/model_metadata.py#L1445)
 
 基础估算是约 4 chars/token：
 
@@ -1404,7 +1404,7 @@ def estimate_request_tokens_rough(
 
 ## 19. 默认 ContextCompressor 初始化
 
-源码位置：[agent/context_compressor.py:404](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/context_compressor.py)
+源码位置：[agent/context_compressor.py:404](../agent/context_compressor.py#L404)
 
 默认 compressor 的核心参数：
 
@@ -1467,7 +1467,7 @@ def __init__(
 
 ## 20. 是否应该压缩：阈值与反抖动
 
-源码位置：[agent/context_compressor.py:493](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/context_compressor.py)
+源码位置：[agent/context_compressor.py:493](../agent/context_compressor.py#L493)
 
 `should_compress()` 不只是简单比较阈值，还带反抖动：
 
@@ -1511,7 +1511,7 @@ else:
 
 ## 21. Preflight 压缩：API Call 前主动处理
 
-源码位置：[run_agent.py:11213](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:11213](../run_agent.py#L11213)
 
 如果加载历史时已经超阈值，Hermes 会在第一次 API call 前压缩：
 
@@ -1552,7 +1552,7 @@ preflight 的目标是：
 
 ## 22. API 响应后压缩：基于真实 Usage
 
-源码位置：[run_agent.py:12286](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py) 与 [run_agent.py:14048](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:12286](../run_agent.py#L12286) 与 [run_agent.py:14048](../run_agent.py#L14048)
 
 每次 provider 返回 usage 后，更新 context engine：
 
@@ -1600,7 +1600,7 @@ completion/reasoning tokens 不占下一轮输入窗口；
 
 ## 23. 错误恢复压缩：Context / Payload Overflow
 
-源码位置：[run_agent.py:12977](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py) 与 [run_agent.py:13136](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:12977](../run_agent.py#L12977) 与 [run_agent.py:13136](../run_agent.py#L13136)
 
 当 provider 返回 long context tier 或 payload too large，Hermes 会压缩后重试：
 
@@ -1648,7 +1648,7 @@ messages, active_system_prompt = self._compress_context(
 
 ## 24. `_compress_context()`：压缩编排与 Session Rollover
 
-源码位置：[run_agent.py:9589](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:9589](../run_agent.py#L9589)
 
 `_compress_context()` 是 Agent 层的压缩编排入口：
 
@@ -1744,7 +1744,7 @@ if _old_sid and self._memory_manager:
 
 ## 25. 默认压缩算法：Prune + Summarize + Protect Tail
 
-源码位置：[agent/context_compressor.py:1317](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/context_compressor.py)
+源码位置：[agent/context_compressor.py:1317](../agent/context_compressor.py#L1317)
 
 `ContextCompressor.compress()` 的算法注释非常直接：
 
@@ -1803,7 +1803,7 @@ head protected messages
 
 ## 26. 旧工具输出剪裁：便宜的第一道压缩
 
-源码位置：[agent/context_compressor.py:519](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/context_compressor.py)
+源码位置：[agent/context_compressor.py:519](../agent/context_compressor.py#L519)
 
 在调用辅助模型总结前，先剪裁旧工具输出：
 
@@ -1862,7 +1862,7 @@ if len(args) > 500:
 
 ## 27. 摘要生成：结构化 Handoff，不是重新执行指令
 
-源码位置：[agent/context_compressor.py:766](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/context_compressor.py)
+源码位置：[agent/context_compressor.py:766](../agent/context_compressor.py#L766)
 
 摘要生成会先序列化中间消息，并做敏感信息脱敏：
 
@@ -1913,7 +1913,7 @@ SUMMARY_PREFIX = (
 
 ## 28. Summary 插入：避免破坏消息角色交替
 
-源码位置：[agent/context_compressor.py:1410](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/context_compressor.py)
+源码位置：[agent/context_compressor.py:1410](../agent/context_compressor.py#L1410)
 
 压缩后会重组消息。首先保留 head，并给 system 增加压缩说明：
 
@@ -1979,7 +1979,7 @@ compressed = self._sanitize_tool_pairs(compressed)
 
 ## 29. 消息发送前 Sanitizer
 
-源码位置：[run_agent.py:5499](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:5499](../run_agent.py#L5499)
 
 Hermes 在每次 API call 前都会修复消息：
 
@@ -2010,7 +2010,7 @@ api_messages = self._drop_thinking_only_and_merge_users(api_messages)
 
 ## 30. 手动压缩：CLI `/compress <focus>`
 
-源码位置：[cli.py:7997](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/cli.py)
+源码位置：[cli.py:7997](../cli.py#L7997)
 
 CLI 支持用户手动压缩，并可传入 focus topic：
 
@@ -2057,7 +2057,7 @@ compressed, _ = self.agent._compress_context(
 
 ## 31. 手动压缩：Gateway `/compress <focus>`
 
-源码位置：[gateway/run.py:9960](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/gateway/run.py)
+源码位置：[gateway/run.py:9960](../gateway/run.py#L9960)
 
 Gateway 的 `/compress` 会临时创建一个 Agent 来处理当前 gateway session：
 
@@ -2117,7 +2117,7 @@ self.session_store.rewrite_transcript(new_session_id, compressed)
 
 ## 32. Context 配置面
 
-源码位置：[hermes_cli/config.py:673](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/hermes_cli/config.py) 与 [hermes_cli/config.py:969](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/hermes_cli/config.py)
+源码位置：[hermes_cli/config.py:673](../hermes_cli/config.py#L673) 与 [hermes_cli/config.py:969](../hermes_cli/config.py#L969)
 
 压缩默认配置：
 
@@ -2256,8 +2256,8 @@ run_agent.py::_compress_context()
 
 相关源码：
 
-- [run_agent.py:5413](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
-- [agent/prompt_builder.py:1394](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/prompt_builder.py)
+- [run_agent.py:5413](../run_agent.py#L5413)
+- [agent/prompt_builder.py:1394](../agent/prompt_builder.py#L1394)
 
 ### 35.2 为什么很早就压缩
 
@@ -2270,8 +2270,8 @@ run_agent.py::_compress_context()
 
 相关源码：
 
-- [agent/model_metadata.py:1533](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/model_metadata.py)
-- [run_agent.py:11227](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+- [agent/model_metadata.py:1533](../agent/model_metadata.py#L1533)
+- [run_agent.py:11227](../run_agent.py#L11227)
 
 ### 35.3 为什么压缩后看起来“丢上下文”
 
@@ -2284,8 +2284,8 @@ run_agent.py::_compress_context()
 
 相关源码：
 
-- [run_agent.py:9622](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
-- [agent/context_compressor.py:1424](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/context_compressor.py)
+- [run_agent.py:9622](../run_agent.py#L9622)
+- [agent/context_compressor.py:1424](../agent/context_compressor.py#L1424)
 
 ### 35.4 为什么 context engine 工具没有暴露
 
@@ -2298,9 +2298,9 @@ run_agent.py::_compress_context()
 
 相关源码：
 
-- [run_agent.py:2165](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
-- [run_agent.py:2254](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
-- [plugins/context_engine/\_\_init\_\_.py:79](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/plugins/context_engine/__init__.py)
+- [run_agent.py:2165](../run_agent.py#L2165)
+- [run_agent.py:2254](../run_agent.py#L2254)
+- [plugins/context_engine/\_\_init\_\_.py:79](../plugins/context_engine/__init__.py#L79)
 
 ---
 

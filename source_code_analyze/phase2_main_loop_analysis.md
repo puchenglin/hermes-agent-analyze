@@ -25,6 +25,47 @@
 
 ## 2. 主循环整体定位
 
+### 2.1 概念边界：主循环处理的是一次用户请求
+
+先区分几个容易混用的词：
+
+| 概念 | 在 Hermes 源码里的含义 |
+| --- | --- |
+| `session` | 一段持续会话，包含多次用户输入、多次 turn，最终持久化到 session DB/log |
+| `turn` | 用户发出一条消息后，Agent 从接收到返回最终响应的完整处理轮次 |
+| `run_conversation()` | Hermes 对单个 turn 的执行入口；名字叫 conversation，但语义更接近“处理当前这条用户请求” |
+| 主循环 / tool-calling loop | 一个 turn 内部的 `LLM -> tool -> LLM -> ... -> final_response` 循环 |
+| iteration / API call | 主循环内部的一次模型调用尝试；一次 turn 里可以有很多 iteration |
+| tool call | 某次 iteration 中模型要求执行的工具调用 |
+
+因此，本阶段说的 **AIAgent 主循环** 不是整个聊天 session 的外层无限循环，而是一次用户请求内部的 Agent 执行循环：
+
+```text
+Session
+  ├─ 用户请求 1
+  │   └─ run_conversation()
+  │       └─ 主循环：LLM -> Tool -> LLM -> Final
+  ├─ 用户请求 2
+  │   └─ run_conversation()
+  │       └─ 主循环：LLM -> Final
+  └─ 用户请求 3
+      └─ run_conversation()
+          └─ 主循环：LLM -> Tool -> Tool -> LLM -> Final
+```
+
+换句话说：
+
+```text
+一个 session 可以包含很多 turn；
+一个 turn 对应一次用户请求；
+一次 run_conversation() 处理一个 turn；
+主循环是在这个 turn 内部反复调用模型和工具，直到得到 final_response。
+```
+
+这也是为什么 `agent.max_turns` 这个配置名容易误导：它不是限制整个 session 最多聊多少轮，而是限制**单次用户请求内部最多多少次 tool-calling iteration**。源码中它最终会传成 `AIAgent(max_iterations=self.max_turns)`。
+
+### 2.2 执行结构
+
 `run_conversation()` 不是单纯的 “while 调模型直到没有工具调用”。它实际包含三层循环/恢复结构：
 
 ```text
@@ -117,6 +158,179 @@ while (api_call_count < self.max_iterations and self.iteration_budget.remaining 
 3. `self._interrupt_requested`
 
 还有一个特殊路径：`self._budget_grace_call`。这允许预算耗尽后给模型一次额外机会总结或收束。
+
+### 3.2.1 `max_iterations` 与 `iteration_budget` 的配置来源
+
+`max_iterations` 是主循环的显式上限；`iteration_budget` 是运行期预算对象，默认由 `max_iterations` 派生，不是独立的用户配置项。
+
+```text
+用户配置 agent.max_turns / --max-turns
+    -> CLI/Gateway 解析成 max_iterations
+    -> AIAgent(max_iterations=...)
+    -> IterationBudget(max_iterations)
+    -> while 条件同时检查 api_call_count 与 iteration_budget.remaining
+```
+
+#### AIAgent 默认值
+
+源码位置：[run_agent.py:1062](../run_agent.py#L1062)、[run_agent.py:1168](../run_agent.py#L1168)
+
+```python
+# run_agent.py:1062
+def __init__(
+    self,
+    ...
+    max_iterations: int = 90,
+    ...
+    iteration_budget: "IterationBudget" = None,
+):
+    ...
+    self.max_iterations = max_iterations
+    self.iteration_budget = iteration_budget or IterationBudget(max_iterations)
+```
+
+每个 turn 开始时会重置预算：
+
+```python
+# run_agent.py:11094
+self.iteration_budget = IterationBudget(self.max_iterations)
+```
+
+也就是说，如果调用方没有显式传 `iteration_budget`，它就是 `max_iterations` 的运行期计数器。
+
+#### CLI 主 Agent：`agent.max_turns`
+
+源码位置：[hermes_cli/config.py:402](../hermes_cli/config.py#L402)、[cli.py:2372](../cli.py#L2372)、[cli.py:3984](../cli.py#L3984)
+
+默认配置：
+
+```python
+# hermes_cli/config.py:402
+"agent": {
+    "max_turns": 90,
+}
+```
+
+CLI 解析优先级：
+
+```python
+# cli.py:2372
+# Max turns priority: CLI arg > config file > env var > default
+if max_turns is not None:
+    self.max_turns = max_turns
+elif CLI_CONFIG["agent"].get("max_turns"):
+    self.max_turns = CLI_CONFIG["agent"]["max_turns"]
+elif os.getenv("HERMES_MAX_ITERATIONS"):
+    self.max_turns = int(os.getenv("HERMES_MAX_ITERATIONS", ""))
+else:
+    self.max_turns = 90
+```
+
+最终传给 `AIAgent`：
+
+```python
+# cli.py:3984
+self.agent = AIAgent(
+    ...
+    max_iterations=self.max_turns,
+)
+```
+
+命令行参数是：
+
+```python
+# hermes_cli/_parser.py:320
+chat_parser.add_argument(
+    "--max-turns",
+    type=int,
+    default=None,
+    metavar="N",
+    help="Maximum tool-calling iterations per conversation turn ...",
+)
+```
+
+因此 CLI 主 Agent 的配置方式是：
+
+```yaml
+agent:
+  max_turns: 90
+```
+
+或临时使用：
+
+```bash
+hermes chat --max-turns 120
+```
+
+#### Gateway 主 Agent：`agent.max_turns` bridge 到 `HERMES_MAX_ITERATIONS`
+
+源码位置：[gateway/run.py:324](../gateway/run.py#L324)、[gateway/run.py:9505](../gateway/run.py#L9505)
+
+Gateway 启动时会把 `config.yaml` 的 `agent.max_turns` 桥接到环境变量：
+
+```python
+# gateway/run.py:324
+agent_cfg = cfg.get("agent", {})
+if isinstance(agent_cfg, dict) and "max_turns" in agent_cfg:
+    os.environ["HERMES_MAX_ITERATIONS"] = str(agent_cfg["max_turns"])
+```
+
+创建 Agent 时再读取：
+
+```python
+# gateway/run.py:9505
+max_iterations = int(os.getenv("HERMES_MAX_ITERATIONS", "90"))
+agent = AIAgent(
+    ...
+    max_iterations=max_iterations,
+)
+```
+
+所以 Gateway 的用户配置仍然是：
+
+```yaml
+agent:
+  max_turns: 90
+```
+
+`HERMES_MAX_ITERATIONS` 是兼容和桥接路径，不是推荐的长期配置入口。
+
+#### 子 Agent：`delegation.max_iterations`
+
+源码位置：[hermes_cli/config.py:1007](../hermes_cli/config.py#L1007)、[tools/delegate_tool.py:1928](../tools/delegate_tool.py#L1928)
+
+delegation 子 Agent 不使用父 Agent 的 `agent.max_turns`，而是有自己的配置：
+
+```python
+# hermes_cli/config.py:1007
+"delegation": {
+    "max_iterations": 50,
+}
+```
+
+`delegate_task` 会使用 config 中的值，并忽略模型通过工具参数传入的 `max_iterations`：
+
+```python
+# tools/delegate_tool.py:1928
+default_max_iter = cfg.get("max_iterations", DEFAULT_MAX_ITERATIONS)
+# Model-supplied max_iterations is ignored — the config value is authoritative
+effective_max_iter = default_max_iter
+```
+
+因此子 Agent 配置方式是：
+
+```yaml
+delegation:
+  max_iterations: 50
+```
+
+#### 配置关系总结
+
+| 对象 | 配置入口 | 默认值 | 是否单独配置 `iteration_budget` |
+| --- | --- | ---: | --- |
+| CLI 主 Agent | `agent.max_turns` 或 `--max-turns` | `90` | 否，由 `max_iterations` 创建 |
+| Gateway 主 Agent | `agent.max_turns`，启动时桥接到 `HERMES_MAX_ITERATIONS` | `90` | 否，由 `max_iterations` 创建 |
+| Delegation 子 Agent | `delegation.max_iterations` | `50` | 否，由子 Agent 的 `max_iterations` 创建 |
 
 ### 3.3 每次 API 调用前构建请求消息
 
@@ -760,7 +974,9 @@ def run_conversation(user_message, history):
 | `api_messages` | 每次 API 调用的临时副本，可注入 memory/plugin/system/prefill |
 | `active_system_prompt` | 当前 turn 使用的 system prompt，压缩后可能更新 |
 | `api_call_count` | 外层 loop 的 API 调用计数 |
-| `iteration_budget` | 子 agent 共享预算，防止工具调用无限循环 |
+| `max_iterations` | 当前 Agent 的 API/tool-calling loop 上限；主 Agent 来自 `agent.max_turns`，子 Agent 来自 `delegation.max_iterations` |
+| `iteration_budget` | 当前 turn 的运行期预算计数器，默认 `IterationBudget(self.max_iterations)`，防止工具调用无限循环 |
+| `_budget_grace_call` | 预算耗尽后的 one-shot 宽限模型调用，用于让模型总结工具结果 |
 | `final_response` | 最终返回给调用方的文本 |
 | `interrupted` | 是否被用户或平台中断 |
 | `_turn_exit_reason` | 本轮结束原因，用于日志和结果诊断 |

@@ -70,8 +70,8 @@ Honcho / Mem0 / Hindsight / Supermemory / other provider backend
 
 对应源码：
 
-- [tools/memory_tool.py:55](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py) 的 `get_memory_dir()` 决定内置 memory 文件位置。
-- [plugins/memory/__init__.py:1](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/plugins/memory/__init__.py) 说明外部 provider 来自 bundled 与 `$HERMES_HOME/plugins/`。
+- [tools/memory_tool.py:55](../tools/memory_tool.py#L55) 的 `get_memory_dir()` 决定内置 memory 文件位置。
+- [plugins/memory/**init**.py:1](../plugins/memory/__init__.py#L1) 说明外部 provider 来自 bundled 与 `$HERMES_HOME/plugins/`。
 
 ### 2.2 第二层：记忆抽象层
 
@@ -91,8 +91,8 @@ MemoryProvider ABC
 
 对应源码：
 
-- [tools/memory_tool.py:107](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py) 的 `MemoryStore` 负责本地 entries、字符预算、文件读写、frozen snapshot。
-- [agent/memory_provider.py:42](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/memory_provider.py) 的 `MemoryProvider` 定义 provider 生命周期：`initialize()`、`prefetch()`、`sync_turn()`、`get_tool_schemas()`、`handle_tool_call()` 等。
+- [tools/memory_tool.py:107](../tools/memory_tool.py#L107) 的 `MemoryStore` 负责本地 entries、字符预算、文件读写、frozen snapshot。
+- [agent/memory_provider.py:42](../agent/memory_provider.py#L42) 的 `MemoryProvider` 定义 provider 生命周期：`initialize()`、`prefetch()`、`sync_turn()`、`get_tool_schemas()`、`handle_tool_call()` 等。
 
 ### 2.3 第三层：编排注入层
 
@@ -109,11 +109,11 @@ MemoryManager
 
 对应源码：
 
-- [run_agent.py:1875](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py) 初始化内置 `MemoryStore` 与外部 `MemoryManager`。
-- [run_agent.py:5375](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py) 把内置 memory frozen snapshot 与 provider static block 注入 system prompt。
-- [run_agent.py:11344](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py) 每轮开始通知 provider 并执行 `prefetch_all()`。
-- [run_agent.py:14668](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py) 每轮结束执行 `sync_all()` 与 `queue_prefetch_all()`。
-- [agent/memory_manager.py:190](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/memory_manager.py) 的 `MemoryManager` 统一编排 provider。
+- [run_agent.py:1875](../run_agent.py#L1875) 初始化内置 `MemoryStore` 与外部 `MemoryManager`。
+- [run_agent.py:5375](../run_agent.py#L5375) 把内置 memory frozen snapshot 与 provider static block 注入 system prompt。
+- [run_agent.py:11344](../run_agent.py#L11344) 每轮开始通知 provider 并执行 `prefetch_all()`。
+- [run_agent.py:14668](../run_agent.py#L14668) 每轮结束执行 `sync_all()` 与 `queue_prefetch_all()`。
+- [agent/memory_manager.py:190](../agent/memory_manager.py#L190) 的 `MemoryManager` 统一编排 provider。
 
 ### 2.4 第四层：模型交互层
 
@@ -129,10 +129,10 @@ MemoryManager
 
 对应源码：
 
-- [run_agent.py:11515](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py) 将 provider recall 包成 `<memory-context>` 注入当前 user message。
-- [tools/memory_tool.py:570](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py) 将内置 `memory` 注册成模型可调用工具。
-- [run_agent.py:1963](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py) 将 provider tools 直接 append 到 `self.tools` 并更新 `valid_tool_names`。
-- [run_agent.py:9881](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py) 与 [run_agent.py:10508](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py) 处理模型调用 `memory` tool 或 provider tools。
+- [run_agent.py:11515](../run_agent.py#L11515) 将 provider recall 包成 `<memory-context>` 注入当前 user message。
+- [tools/memory_tool.py:570](../tools/memory_tool.py#L570) 将内置 `memory` 注册成模型可调用工具。
+- [run_agent.py:1963](../run_agent.py#L1963) 将 provider tools 直接 append 到 `self.tools` 并更新 `valid_tool_names`。
+- [run_agent.py:9881](../run_agent.py#L9881) 与 [run_agent.py:10508](../run_agent.py#L10508) 处理模型调用 `memory` tool 或 provider tools。
 
 ### 2.5 四层与两条实现链路的对应关系
 
@@ -178,35 +178,42 @@ flowchart TB
 
 ## 3. 源码跳转索引
 
-| 模块                         | 作用                            | Obsidian 链接                                                                                                                |
-| ---------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `tools/memory_tool.py`       | 内置文件记忆工具                | [memory_tool.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py)                   |
-| `agent/memory_provider.py`   | 外部 provider 抽象接口          | [memory_provider.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/memory_provider.py)           |
-| `agent/memory_manager.py`    | provider 编排器                 | [memory_manager.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/memory_manager.py)             |
-| `plugins/memory/__init__.py` | memory provider 插件发现与加载  | [plugins/memory/\_\_init\_\_.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/plugins/memory/__init__.py) |
-| `run_agent.py`               | Memory 初始化、注入、调用、同步 | [run_agent.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)                             |
-| `toolsets.py`                | `memory` toolset 暴露           | [toolsets.py](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/toolsets.py)                               |
+| 模块                         | 作用                            | Markdown 链接                                                   |
+| ---------------------------- | ------------------------------- | --------------------------------------------------------------- |
+| `tools/memory_tool.py`       | 内置文件记忆工具                | [memory_tool.py](../tools/memory_tool.py)                       |
+| `agent/memory_provider.py`   | 外部 provider 抽象接口          | [memory_provider.py](../agent/memory_provider.py)               |
+| `agent/memory_manager.py`    | provider 编排器                 | [memory_manager.py](../agent/memory_manager.py)                 |
+| `plugins/memory/__init__.py` | memory provider 插件发现与加载  | [plugins/memory/\_\_init\_\_.py](../plugins/memory/__init__.py) |
+| `run_agent.py`               | Memory 初始化、注入、调用、同步 | [run_agent.py](../run_agent.py)                                 |
+| `hermes_cli/config.py`       | Memory 默认配置                 | [config.py](../hermes_cli/config.py)                            |
+| `toolsets.py`                | `memory` toolset 暴露           | [toolsets.py](../toolsets.py)                                   |
 
 关键位置：
 
-| 位置                                                                                                                             | 职责                               |
-| -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| [tools/memory_tool.py:1](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py)               | 内置 Memory 设计说明               |
-| [tools/memory_tool.py:55](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py)              | profile-aware memory 目录          |
-| [tools/memory_tool.py:107](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py)             | `MemoryStore`                      |
-| [tools/memory_tool.py:465](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py)             | `memory_tool()` dispatcher         |
-| [tools/memory_tool.py:570](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py)             | `registry.register(name="memory")` |
-| [agent/memory_provider.py:42](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/memory_provider.py)      | `MemoryProvider` ABC               |
-| [agent/memory_manager.py:173](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/memory_manager.py)       | prefetch context fence             |
-| [agent/memory_manager.py:190](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/memory_manager.py)       | `MemoryManager`                    |
-| [plugins/memory/\_\_init\_\_.py:160](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/plugins/memory/__init__.py) | `load_memory_provider()`           |
-| [run_agent.py:1875](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)                            | 内置 memory 与 provider 初始化     |
-| [run_agent.py:5375](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)                            | Memory 注入 system prompt          |
-| [run_agent.py:11344](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)                           | provider turn-start 与 prefetch    |
-| [run_agent.py:11515](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)                           | prefetch context 注入 user message |
-| [run_agent.py:9881](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)                            | 并发路径内置 memory 工具执行       |
-| [run_agent.py:10508](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)                           | 顺序路径内置 memory 工具执行       |
-| [run_agent.py:14668](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)                           | turn 结束后同步外部 memory         |
+| 位置                                                                     | 职责                                                  |
+| ------------------------------------------------------------------------ | ----------------------------------------------------- |
+| [tools/memory_tool.py:1](../tools/memory_tool.py#L1)                     | 内置 Memory 设计说明                                  |
+| [tools/memory_tool.py:55](../tools/memory_tool.py#L55)                   | profile-aware memory 目录                             |
+| [tools/memory_tool.py:107](../tools/memory_tool.py#L107)                 | `MemoryStore`                                         |
+| [tools/memory_tool.py:118](../tools/memory_tool.py#L118)                 | `MEMORY.md=2200`、`USER.md=1375` 默认字符预算         |
+| [tools/memory_tool.py:218](../tools/memory_tool.py#L218)                 | 按 target 返回对应字符预算                            |
+| [tools/memory_tool.py:244](../tools/memory_tool.py#L244)                 | `add()` 超限拒绝                                      |
+| [tools/memory_tool.py:310](../tools/memory_tool.py#L310)                 | `replace()` 超限拒绝                                  |
+| [tools/memory_tool.py:465](../tools/memory_tool.py#L465)                 | `memory_tool()` dispatcher                            |
+| [tools/memory_tool.py:570](../tools/memory_tool.py#L570)                 | `registry.register(name="memory")`                    |
+| [agent/memory_provider.py:42](../agent/memory_provider.py#L42)           | `MemoryProvider` ABC                                  |
+| [agent/memory_manager.py:173](../agent/memory_manager.py#L173)           | prefetch context fence                                |
+| [agent/memory_manager.py:190](../agent/memory_manager.py#L190)           | `MemoryManager`                                       |
+| [plugins/memory/\_\_init\_\_.py:160](../plugins/memory/__init__.py#L160) | `load_memory_provider()`                              |
+| [run_agent.py:1875](../run_agent.py#L1875)                               | 内置 memory 与 provider 初始化                        |
+| [run_agent.py:1891](../run_agent.py#L1891)                               | 从 config 读取 memory/user 字符预算                   |
+| [run_agent.py:5375](../run_agent.py#L5375)                               | Memory 注入 system prompt                             |
+| [run_agent.py:11344](../run_agent.py#L11344)                             | provider turn-start 与 prefetch                       |
+| [run_agent.py:11515](../run_agent.py#L11515)                             | prefetch context 注入 user message                    |
+| [run_agent.py:9881](../run_agent.py#L9881)                               | 并发路径内置 memory 工具执行                          |
+| [run_agent.py:10508](../run_agent.py#L10508)                             | 顺序路径内置 memory 工具执行                          |
+| [run_agent.py:14668](../run_agent.py#L14668)                             | turn 结束后同步外部 memory                            |
+| [hermes_cli/config.py:983](../hermes_cli/config.py#L983)                 | 默认 `memory_char_limit=2200`、`user_char_limit=1375` |
 
 ---
 
@@ -293,7 +300,7 @@ The snapshot refreshes on the next session start.
 """
 ```
 
-源码位置：[tools/memory_tool.py:1](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py)
+源码位置：[tools/memory_tool.py:1](../tools/memory_tool.py#L1)
 
 这里最关键的是 “frozen snapshot”：
 
@@ -320,7 +327,7 @@ def get_memory_dir() -> Path:
     return get_hermes_home() / "memories"
 ```
 
-源码位置：[tools/memory_tool.py:51](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py)
+源码位置：[tools/memory_tool.py:51](../tools/memory_tool.py#L51)
 
 Memory 文件位于：
 
@@ -349,7 +356,7 @@ _MEMORY_THREAT_PATTERNS = [
 ]
 ```
 
-源码位置：[tools/memory_tool.py:67](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py)
+源码位置：[tools/memory_tool.py:67](../tools/memory_tool.py#L67)
 
 因为内置 memory 内容会进入 system prompt，所以写入前会做轻量安全扫描：
 
@@ -380,12 +387,105 @@ class MemoryStore:
         self._system_prompt_snapshot: Dict[str, str] = {"memory": "", "user": ""}
 ```
 
-源码位置：[tools/memory_tool.py:107](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py)
+源码位置：[tools/memory_tool.py:107](../tools/memory_tool.py#L107)
 
 `MemoryStore` 同时持有两份状态：
 
 - `memory_entries` / `user_entries`：当前内存中的 live entries，工具写入后会变化。
 - `_system_prompt_snapshot`：`load_from_disk()` 时冻结，system prompt 只读这份。
+
+### 4.4.1 字符预算：`MEMORY.md` 2200 chars，`USER.md` 1375 chars
+
+内置文件记忆是 **bounded curated memory**，不是无限增长的日志。默认字符预算在 `MemoryStore.__init__()` 上定义：
+
+```python
+# tools/memory_tool.py:118
+def __init__(self, memory_char_limit: int = 2200, user_char_limit: int = 1375):
+    self.memory_entries: List[str] = []
+    self.user_entries: List[str] = []
+    self.memory_char_limit = memory_char_limit
+    self.user_char_limit = user_char_limit
+```
+
+对应规则：
+
+| 文件        | target   |     默认上限 | 设计含义                               |
+| ----------- | -------- | -----------: | -------------------------------------- |
+| `MEMORY.md` | `memory` | `2200 chars` | Agent 对环境、项目、任务模式的长期笔记 |
+| `USER.md`   | `user`   | `1375 chars` | 用户画像、偏好、沟通风格、稳定约束     |
+
+这两个默认值也写在全局默认配置里：
+
+```python
+# hermes_cli/config.py:983
+"memory": {
+    "memory_enabled": True,
+    "user_profile_enabled": True,
+    "memory_char_limit": 2200,   # ~800 tokens at 2.75 chars/token
+    "user_char_limit": 1375,     # ~500 tokens at 2.75 chars/token
+}
+```
+
+Agent 初始化时会从配置读取这两个值；如果用户没有改配置，就使用 `2200 / 1375`：
+
+```python
+# run_agent.py:1891
+self._memory_store = MemoryStore(
+    memory_char_limit=mem_config.get("memory_char_limit", 2200),
+    user_char_limit=mem_config.get("user_char_limit", 1375),
+)
+```
+
+执行写入时，Hermes 根据 target 选择对应预算：
+
+```python
+# tools/memory_tool.py:218
+def _char_limit(self, target: str) -> int:
+    if target == "user":
+        return self.user_char_limit
+    return self.memory_char_limit
+```
+
+`add()` 会用 `ENTRY_DELIMITER.join(entries)` 计算写入后的总长度，超过预算直接拒绝：
+
+```python
+# tools/memory_tool.py:244
+new_entries = entries + [content]
+new_total = len(ENTRY_DELIMITER.join(new_entries))
+
+if new_total > limit:
+    current = self._char_count(target)
+    return {
+        "success": False,
+        "error": (
+            f"Memory at {current:,}/{limit:,} chars. "
+            f"Adding this entry ({len(content)} chars) would exceed the limit. "
+            f"Replace or remove existing entries first."
+        ),
+        "current_entries": entries,
+        "usage": f"{current:,}/{limit:,}",
+    }
+```
+
+`replace()` 同样会先模拟替换后的总长度，超限则拒绝：
+
+```python
+# tools/memory_tool.py:310
+test_entries = entries.copy()
+test_entries[idx] = new_content
+new_total = len(ENTRY_DELIMITER.join(test_entries))
+
+if new_total > limit:
+    return {
+        "success": False,
+        "error": (
+            f"Replacement would put memory at {new_total:,}/{limit:,} chars. "
+            f"Shorten the new content or remove other entries first."
+        ),
+    }
+```
+
+这个限制的直接影响是：Hermes 鼓励把内置 Memory 维护成“短而高价值的事实/偏好集合”，而不是把每轮对话或长任务日志塞进 `MEMORY.md` / `USER.md`。超过预算时，模型需要先 `replace` 或 `remove` 旧条目，再写入新条目。
 
 ### 4.5 加载与冻结
 
@@ -409,7 +509,7 @@ def load_from_disk(self):
     }
 ```
 
-源码位置：[tools/memory_tool.py:126](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py)
+源码位置：[tools/memory_tool.py:126](../tools/memory_tool.py#L126)
 
 加载流程：
 
@@ -449,7 +549,7 @@ def _write_file(path: Path, entries: List[str]):
             atomic_replace(tmp_path, path)
 ```
 
-源码位置：[tools/memory_tool.py:435](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py)
+源码位置：[tools/memory_tool.py:435](../tools/memory_tool.py#L435)
 
 ---
 
@@ -499,7 +599,7 @@ def memory_tool(
     return json.dumps(result, ensure_ascii=False)
 ```
 
-源码位置：[tools/memory_tool.py:465](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py)
+源码位置：[tools/memory_tool.py:465](../tools/memory_tool.py#L465)
 
 注意：虽然模块注释提到 `read`，当前 schema 和 dispatcher 只支持：
 
@@ -530,7 +630,7 @@ MEMORY_SCHEMA = {
         "state to memory; use session_search to recall those from past transcripts.\n"
 ```
 
-源码位置：[tools/memory_tool.py:515](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py)
+源码位置：[tools/memory_tool.py:515](../tools/memory_tool.py#L515)
 
 这里把 memory 的“产品策略”写在 schema description 里：
 
@@ -556,7 +656,7 @@ registry.register(
 )
 ```
 
-源码位置：[tools/memory_tool.py:570](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/tools/memory_tool.py)
+源码位置：[tools/memory_tool.py:570](../tools/memory_tool.py#L570)
 
 虽然 `memory` 已注册进 `ToolRegistry`，但在执行阶段它不是普通 registry-dispatched tool。`run_agent.py` 会把它作为 agent-level tool 特判，因为它需要当前 agent 的 `self._memory_store`。
 
@@ -591,7 +691,7 @@ if not skip_memory:
         pass  # Memory is optional -- don't break agent init
 ```
 
-源码位置：[run_agent.py:1875](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:1875](../run_agent.py#L1875)
 
 这里的配置项：
 
@@ -629,7 +729,7 @@ if not skip_memory:
                 }
 ```
 
-源码位置：[run_agent.py:1900](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:1900](../run_agent.py#L1900)
 
 外部 provider 的激活条件：
 
@@ -675,7 +775,7 @@ if self._memory_manager and self.tools is not None:
             _existing_tool_names.add(_tname)
 ```
 
-源码位置：[run_agent.py:1963](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:1963](../run_agent.py#L1963)
 
 这条路径绕过 `ToolRegistry.get_definitions()`，因为 provider tools 是当前 Agent 实例相关工具。它必须手动维护两件事：
 
@@ -712,7 +812,7 @@ class MemoryProvider(ABC):
         """Initialize for a session.
 ```
 
-源码位置：[agent/memory_provider.py:42](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/memory_provider.py)
+源码位置：[agent/memory_provider.py:42](../agent/memory_provider.py#L42)
 
 Provider 必须实现：
 
@@ -763,7 +863,7 @@ def sync_turn(self, user_content: str, assistant_content: str, *, session_id: st
     """
 ```
 
-源码位置：[agent/memory_provider.py:92](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/memory_provider.py)
+源码位置：[agent/memory_provider.py:92](../agent/memory_provider.py#L92)
 
 设计上，provider 不应该在主循环里做重型同步：
 
@@ -791,7 +891,7 @@ class MemoryManager:
         self._has_external: bool = False  # True once a non-builtin provider is added
 ```
 
-源码位置：[agent/memory_manager.py:190](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/memory_manager.py)
+源码位置：[agent/memory_manager.py:190](../agent/memory_manager.py#L190)
 
 Hermes 明确限制“同一时间只允许一个外部 memory provider”：
 
@@ -835,7 +935,7 @@ def add_provider(self, provider: MemoryProvider) -> None:
             self._tool_to_provider[tool_name] = provider
 ```
 
-源码位置：[agent/memory_manager.py:204](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/memory_manager.py)
+源码位置：[agent/memory_manager.py:204](../agent/memory_manager.py#L204)
 
 `_tool_to_provider` 是 provider tool 执行路由表。后续主循环看到 provider 工具名时，不走 `registry.dispatch()`，而是：
 
@@ -877,7 +977,7 @@ def prefetch_all(self, query: str, *, session_id: str = "") -> str:
     return "\n\n".join(parts)
 ```
 
-源码位置：[agent/memory_manager.py:264](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/memory_manager.py)
+源码位置：[agent/memory_manager.py:264](../agent/memory_manager.py#L264)
 
 manager 的原则是“provider 失败不阻断主流程”：
 
@@ -918,7 +1018,7 @@ def handle_tool_call(
         return provider.handle_tool_call(tool_name, args, **kwargs)
 ```
 
-源码位置：[agent/memory_manager.py:330](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/memory_manager.py)
+源码位置：[agent/memory_manager.py:330](../agent/memory_manager.py#L330)
 
 这解释了为什么 provider 工具不是普通 registry 工具：
 
@@ -949,7 +1049,7 @@ Only ONE provider can be active at a time, selected via
 """
 ```
 
-源码位置：[plugins/memory/\_\_init\_\_.py:1](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/plugins/memory/__init__.py)
+源码位置：[plugins/memory/\_\_init\_\_.py:1](../plugins/memory/__init__.py#L1)
 
 与普通插件不同，memory provider 有单独发现系统：
 
@@ -977,7 +1077,7 @@ def _is_memory_provider_dir(path: Path) -> bool:
         return False
 ```
 
-源码位置：[plugins/memory/\_\_init\_\_.py:51](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/plugins/memory/__init__.py)
+源码位置：[plugins/memory/\_\_init\_\_.py:51](../plugins/memory/__init__.py#L51)
 
 用户插件目录里可能有普通插件，所以这里用 cheap source scan 先判断是不是 memory provider，避免导入不相关插件。
 
@@ -1006,7 +1106,7 @@ def load_memory_provider(name: str) -> Optional["MemoryProvider"]:
         return None
 ```
 
-源码位置：[plugins/memory/\_\_init\_\_.py:160](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/plugins/memory/__init__.py)
+源码位置：[plugins/memory/\_\_init\_\_.py:160](../plugins/memory/__init__.py#L160)
 
 `_load_provider_from_dir()` 支持两种 provider 写法：
 
@@ -1045,7 +1145,7 @@ if self._memory_manager:
         pass
 ```
 
-源码位置：[run_agent.py:5375](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:5375](../run_agent.py#L5375)
 
 与 prefetch 不同，system prompt 只在 session 开始或压缩后重建。继续会话时会复用 DB 里保存的 system prompt：
 
@@ -1058,7 +1158,7 @@ if self._memory_manager:
 # prefix cache.
 ```
 
-源码位置：[run_agent.py:11166](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:11166](../run_agent.py#L11166)
 
 这个选择非常重要：Gateway 每条消息可能新建一个 `AIAgent`，如果每次都从磁盘重新注入 Memory，会破坏同一会话的系统提示词稳定性。
 
@@ -1080,7 +1180,7 @@ if self._memory_manager:
         pass
 ```
 
-源码位置：[run_agent.py:11344](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:11344](../run_agent.py#L11344)
 
 `on_turn_start()` 在 `prefetch_all()` 前调用，让 provider 可以基于 turn number、cadence、session context 决定是否刷新 recall。
 
@@ -1101,7 +1201,7 @@ if self._memory_manager:
         pass
 ```
 
-源码位置：[run_agent.py:11354](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:11354](../run_agent.py#L11354)
 
 关键点：
 
@@ -1131,7 +1231,7 @@ if idx == current_turn_user_idx and msg.get("role") == "user":
             api_msg["content"] = _base + "\n\n" + "\n\n".join(_injections)
 ```
 
-源码位置：[run_agent.py:11515](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:11515](../run_agent.py#L11515)
 
 这一段是 Memory 子系统最关键的运行期设计：
 
@@ -1160,7 +1260,7 @@ def build_memory_context_block(raw_context: str) -> str:
     )
 ```
 
-源码位置：[agent/memory_manager.py:173](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/agent/memory_manager.py)
+源码位置：[agent/memory_manager.py:173](../agent/memory_manager.py#L173)
 
 `<memory-context>` 的作用：
 
@@ -1204,7 +1304,7 @@ elif self._memory_manager and self._memory_manager.has_tool(function_name):
     return self._memory_manager.handle_tool_call(function_name, function_args)
 ```
 
-源码位置：[run_agent.py:9881](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:9881](../run_agent.py#L9881)
 
 ### 12.2 顺序执行路径也保留同样特判
 
@@ -1235,7 +1335,7 @@ elif function_name == "memory":
             pass
 ```
 
-源码位置：[run_agent.py:10508](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:10508](../run_agent.py#L10508)
 
 ### 12.3 provider 工具不是 registry-dispatched
 
@@ -1256,7 +1356,7 @@ elif self._memory_manager and self._memory_manager.has_tool(function_name):
         _mem_result = function_result
 ```
 
-源码位置：[run_agent.py:10593](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:10593](../run_agent.py#L10593)
 
 这意味着：
 
@@ -1286,7 +1386,7 @@ if self._memory_manager and function_args.get("action") in ("add", "replace"):
         pass
 ```
 
-源码位置：[run_agent.py:10518](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:10518](../run_agent.py#L10518)
 
 metadata 构造如下：
 
@@ -1313,7 +1413,7 @@ def _build_memory_write_metadata(
     }
 ```
 
-源码位置：[run_agent.py:3936](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:3936](../run_agent.py#L3936)
 
 这条 bridge 的意义：
 
@@ -1358,7 +1458,7 @@ def _sync_external_memory_for_turn(
         pass
 ```
 
-源码位置：[run_agent.py:5077](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:5077](../run_agent.py#L5077)
 
 调用点：
 
@@ -1371,7 +1471,7 @@ self._sync_external_memory_for_turn(
 )
 ```
 
-源码位置：[run_agent.py:14668](obsidian://open?path=/Users/chenglin.pu/Project/github/hermes-agent/run_agent.py)
+源码位置：[run_agent.py:14668](../run_agent.py#L14668)
 
 同步策略：
 
@@ -1510,7 +1610,7 @@ registry：不一定进入 ToolRegistry
 
 ## 19. 常见问题排查
 
-### 18.1 模型看不到 `memory` 工具
+### 19.1 模型看不到 `memory` 工具
 
 检查：
 
@@ -1521,7 +1621,7 @@ registry：不一定进入 ToolRegistry
 4. config 是否 skip_memory 或工具集禁用了 memory
 ```
 
-### 18.2 `memory` 工具返回 Memory is not available
+### 19.2 `memory` 工具返回 Memory is not available
 
 通常说明 `self._memory_store is None`。
 
@@ -1534,7 +1634,7 @@ registry：不一定进入 ToolRegistry
 4. $HERMES_HOME/memories 是否可写
 ```
 
-### 18.3 写入了 memory，但当前对话没看到
+### 19.3 写入了 memory，但当前对话没看到
 
 这是设计行为：
 
@@ -1546,7 +1646,7 @@ registry：不一定进入 ToolRegistry
 
 如果是外部 provider，则看 provider 是否在下一轮 `prefetch()` 中召回。
 
-### 18.4 provider 工具看得到但执行失败
+### 19.4 provider 工具看得到但执行失败
 
 检查：
 
@@ -1557,7 +1657,7 @@ registry：不一定进入 ToolRegistry
 4. provider 异常是否被 MemoryManager 转成 tool_error
 ```
 
-### 18.5 provider prefetch 没注入
+### 19.5 provider prefetch 没注入
 
 检查：
 
@@ -1573,7 +1673,7 @@ registry：不一定进入 ToolRegistry
 
 ## 20. 设计评价
 
-### 19.1 优点
+### 20.1 优点
 
 - **内置 memory 足够简单可靠**：本地 markdown 文件、字符预算、原子写入、profile-aware。
 - **系统提示词稳定**：frozen snapshot 避免 mid-session prompt drift。
@@ -1581,7 +1681,7 @@ registry：不一定进入 ToolRegistry
 - **失败隔离好**：memory provider 大多是 best-effort，不阻塞主对话。
 - **显式写入可 mirror**：内置 `memory` 写入可以同步通知外部 provider。
 
-### 19.2 成本
+### 20.2 成本
 
 - Memory 有两条暴露路径：registry/toolset 与 direct injection，理解成本较高。
 - 内置 `memory` 注册在 registry，但执行不走 registry dispatch，容易误判。
@@ -1589,7 +1689,7 @@ registry：不一定进入 ToolRegistry
 - 内置 memory 写入当前 session 不立即进 system prompt，新读者容易误以为是 bug。
 - `memory_tool.py` 注释提到 `read`，但当前 dispatcher/schema 没有 read action，文档与实现存在轻微不一致。
 
-### 19.3 最关键的不变量
+### 20.3 最关键的不变量
 
 ```text
 不要在普通 turn 中重建 system prompt 来追内置 memory 文件变化；
